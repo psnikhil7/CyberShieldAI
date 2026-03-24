@@ -311,4 +311,4 @@ with c2:
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown('<div class="footer">Developed by Nikhil • CyberShield AI</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">Developed by Nikhil And Team • CyberShield AI</div>', unsafe_allow_html=True)
