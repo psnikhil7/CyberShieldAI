@@ -16,6 +16,10 @@ model = load_model("cybershield_model.h5")
 with open("tokenizer.pkl", "rb") as f:
     tokenizer = pickle.load(f)
 
+# ---------------- SESSION HISTORY ----------------
+if "scan_history" not in st.session_state:
+    st.session_state.scan_history = []
+
 # ---------------- PREDICTION FUNCTION ----------------
 def predict_message(text):
     seq = tokenizer.texts_to_sequences([text])
@@ -23,7 +27,7 @@ def predict_message(text):
     pred = model.predict(pad, verbose=0)[0][0]
     return pred
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap');
@@ -48,7 +52,7 @@ html, body, [class*="css"] {
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
-    max-width: 1200px;
+    max-width: 1250px;
 }
 
 .hero-box {
@@ -188,6 +192,15 @@ html, body, [class*="css"] {
     line-height: 1.6;
 }
 
+.small-stat {
+    background: rgba(0,198,255,0.08);
+    border: 1px solid rgba(0,198,255,0.18);
+    border-radius: 18px;
+    padding: 16px;
+    margin-top: 12px;
+    color: #eaf7ff;
+}
+
 .footer {
     text-align: center;
     margin-top: 28px;
@@ -203,9 +216,9 @@ st.markdown("""
 <div class="hero-box">
     <div class="hero-title">🛡️ CyberShield AI</div>
     <div class="hero-sub">
-        A premium AI-powered phishing detection dashboard that analyzes SMS and email content using
-        Natural Language Processing and Deep Learning. The system identifies suspicious language,
-        deceptive urgency, and fraud-like message patterns in real time.
+        AI-Powered Phishing Threat Intelligence Platform for analyzing SMS and email content using
+        Natural Language Processing and Deep Learning. The system identifies suspicious wording,
+        deceptive urgency, reward bait, and fraud-like message behavior in real time.
     </div>
     <div>
         <span class="metric-pill">NLP Preprocessing</span>
@@ -215,13 +228,13 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------- MAIN LAYOUT ----------------
-left, right = st.columns([1.4, 1])
+# ---------------- LAYOUT ----------------
+left, right = st.columns([1.45, 1])
 
 with left:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">Threat Analysis Console</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-text">Paste any SMS or email content below and let CyberShield AI evaluate whether the text appears safe or potentially phishing-related.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-text">Paste any SMS or email content below and let CyberShield AI evaluate whether the message appears safe or potentially phishing-related.</div>', unsafe_allow_html=True)
 
     user_input = st.text_area(
         "Enter SMS or Email Message",
@@ -234,11 +247,14 @@ with left:
 with right:
     st.markdown("""
     <div class="section-card">
-        <div class="card-title">Detection Focus</div>
+        <div class="card-title">Threat Intelligence Panel</div>
         <div class="card-text">
-            The model checks for patterns commonly found in phishing messages, such as urgency,
-            reward bait, suspicious language, and misleading calls to action.
+            The system checks for suspicious features such as urgency, fake rewards, risky action phrases,
+            and fraud-oriented communication style.
         </div>
+        <div class="small-stat"><b>Model Accuracy:</b> 98%+</div>
+        <div class="small-stat"><b>Architecture:</b> Embedding + LSTM</div>
+        <div class="small-stat"><b>Dataset Size:</b> 5572 messages</div>
         <div class="sample-box">
             <b>Phishing example:</b><br>
             Congratulations! You have won 50000 rupees. Click now to claim your reward.
@@ -250,42 +266,81 @@ with right:
     </div>
     """, unsafe_allow_html=True)
 
-# ---------------- RESULT ----------------
+# ---------------- ANALYSIS ----------------
 if analyze:
     if user_input.strip() == "":
         st.warning("Please enter a message before analysis.")
     else:
         pred = predict_message(user_input)
+        risk_score = round(float(pred) * 100, 2)
+
+        suspicious_words = [
+            "click", "urgent", "reward", "otp", "bank", "win", "claim",
+            "prize", "offer", "free", "link", "account", "verify", "limited"
+        ]
+        found_words = [word for word in suspicious_words if word in user_input.lower()]
+
+        explanation_points = []
+        if any(word in user_input.lower() for word in ["urgent", "immediately", "now", "limited"]):
+            explanation_points.append("Urgency-based language detected")
+        if any(word in user_input.lower() for word in ["win", "reward", "prize", "offer", "free"]):
+            explanation_points.append("Reward or bait-style wording detected")
+        if any(word in user_input.lower() for word in ["click", "link", "verify", "claim"]):
+            explanation_points.append("Action-trigger phrases detected")
+        if any(word in user_input.lower() for word in ["bank", "account", "otp"]):
+            explanation_points.append("Sensitive or account-related terms detected")
+        if not explanation_points:
+            explanation_points.append("No strong manual red-flag keywords detected; classification is based mainly on learned text patterns")
 
         if pred > 0.5:
-            confidence = round(float(pred) * 100, 2)
             st.markdown(f"""
             <div class="result-phish">
                 <div class="result-title">⚠️ Phishing Threat Detected</div>
                 <div class="result-text">
-                    <b>Threat Confidence:</b> {confidence}%<br><br>
-                    This message appears suspicious and contains patterns often associated with deceptive,
-                    fraudulent, or phishing-style communication. Avoid clicking unknown links or sharing
-                    personal information.
+                    <b>Threat Confidence:</b> {risk_score}%<br><br>
+                    This message appears suspicious and contains patterns commonly associated with
+                    phishing, deceptive intent, or fraudulent communication.
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.progress(min(int(confidence), 100))
         else:
-            confidence = round((1 - float(pred)) * 100, 2)
+            safe_score = round((1 - float(pred)) * 100, 2)
             st.markdown(f"""
             <div class="result-safe">
                 <div class="result-title">✅ Message Appears Safe</div>
                 <div class="result-text">
-                    <b>Safety Confidence:</b> {confidence}%<br><br>
+                    <b>Safety Confidence:</b> {safe_score}%<br><br>
                     The system did not detect strong phishing indicators in this message. Based on the
-                    learned text patterns, it appears to be a normal or non-malicious message.
+                    learned sequence patterns, it appears to be non-malicious.
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            st.progress(min(int(confidence), 100))
 
-# ---------------- BOTTOM INFO ----------------
+        st.markdown("### Threat Meter")
+        if risk_score < 30:
+            st.success(f"🟢 Low Risk • {risk_score}%")
+        elif risk_score < 70:
+            st.warning(f"🟡 Medium Risk • {risk_score}%")
+        else:
+            st.error(f"🔴 High Risk • {risk_score}%")
+
+        st.progress(min(int(risk_score), 100))
+
+        st.markdown("### Suspicious Keywords Found")
+        if found_words:
+            st.write(", ".join(found_words))
+        else:
+            st.write("No obvious suspicious keywords found.")
+
+        st.markdown("### Why this result?")
+        for point in explanation_points:
+            st.write(f"- {point}")
+
+        label = "Phishing" if pred > 0.5 else "Safe"
+        st.session_state.scan_history.insert(0, f"{label} • {user_input[:60]}...")
+        st.session_state.scan_history = st.session_state.scan_history[:5]
+
+# ---------------- BOTTOM SECTION ----------------
 c1, c2 = st.columns(2)
 
 with c1:
@@ -293,22 +348,21 @@ with c1:
     <div class="section-card">
         <div class="card-title">How the System Works</div>
         <div class="card-text">
-            The message is cleaned and tokenized, converted into padded sequences, and then processed by a
-            trained LSTM network. The model learns sequential text behavior and predicts whether the content
-            is safe or phishing-related.
+            The message is cleaned and tokenized, converted into padded sequences, and processed by a
+            trained LSTM network. The model learns sequential text behavior and predicts whether the
+            content is safe or phishing-related.
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 with c2:
-    st.markdown("""
-    <div class="section-card">
-        <div class="card-title">Project Technologies</div>
-        <div class="card-text">
-            Python, Streamlit, TensorFlow, Keras, NLP Tokenization, Sequence Padding, Deep Learning,
-            LSTM Architecture, and Phishing Text Classification.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown('<div class="card-title">Recent Scan History</div>', unsafe_allow_html=True)
+    if st.session_state.scan_history:
+        for item in st.session_state.scan_history:
+            st.write(f"- {item}")
+    else:
+        st.write("No scans yet.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="footer">Developed by Nikhil And Team • CyberShield AI</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">Developed by Nikhil • CyberShield AI</div>', unsafe_allow_html=True)
