@@ -20,12 +20,38 @@ with open("tokenizer.pkl", "rb") as f:
 if "scan_history" not in st.session_state:
     st.session_state.scan_history = []
 
-# ---------------- PREDICTION FUNCTION ----------------
+# ---------------- SMART HYBRID PREDICTION ----------------
 def predict_message(text):
+    text_lower = text.lower()
+
+    official_bank_keywords = [
+        "debited", "credited", "account ending", "do not share",
+        "customer care", "transaction", "balance", "upi", "bank",
+        "inr", "rs.", "available balance", "a/c", "txn"
+    ]
+
+    phishing_keywords = [
+        "click", "claim", "verify", "urgent", "reward", "free",
+        "prize", "win", "link", "limited offer", "login here",
+        "update kyc", "suspend", "blocked", "confirm now"
+    ]
+
+    official_bank_signals = sum(1 for word in official_bank_keywords if word in text_lower)
+    phishing_signals = sum(1 for word in phishing_keywords if word in text_lower)
+
+    # Safe official bank alert
+    if official_bank_signals >= 2 and phishing_signals == 0:
+        return 0.10
+
+    # Strong phishing-style message
+    if phishing_signals >= 2:
+        return 0.90
+
+    # Otherwise use ML model
     seq = tokenizer.texts_to_sequences([text])
     pad = pad_sequences(seq, maxlen=100)
     pred = model.predict(pad, verbose=0)[0][0]
-    return pred
+    return float(pred)
 
 # ---------------- CSS ----------------
 st.markdown("""
@@ -223,7 +249,7 @@ st.markdown("""
     <div>
         <span class="metric-pill">NLP Preprocessing</span>
         <span class="metric-pill">LSTM Deep Learning</span>
-        <span class="metric-pill">Real-Time Threat Analysis</span>
+        <span class="metric-pill">Hybrid Smart Detection</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -234,7 +260,10 @@ left, right = st.columns([1.45, 1])
 with left:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">Threat Analysis Console</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-text">Paste any SMS or email content below and let CyberShield AI evaluate whether the message appears safe or potentially phishing-related.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="card-text">Paste any SMS or email content below and let CyberShield AI evaluate whether the message appears safe or potentially phishing-related.</div>',
+        unsafe_allow_html=True
+    )
 
     user_input = st.text_area(
         "Enter SMS or Email Message",
@@ -250,7 +279,7 @@ with right:
         <div class="card-title">Threat Intelligence Panel</div>
         <div class="card-text">
             The system checks for suspicious features such as urgency, fake rewards, risky action phrases,
-            and fraud-oriented communication style.
+            fraud-oriented communication style, and official transaction-message patterns.
         </div>
         <div class="small-stat"><b>Model Accuracy:</b> 98%+</div>
         <div class="small-stat"><b>Architecture:</b> Embedding + LSTM</div>
@@ -260,8 +289,8 @@ with right:
             Congratulations! You have won 50000 rupees. Click now to claim your reward.
         </div>
         <div class="sample-box">
-            <b>Safe example:</b><br>
-            Hi bro, meeting is at 5 pm tomorrow. Please be on time.
+            <b>Official bank example:</b><br>
+            Dear Customer, INR 2,500 has been debited from your SBI account ending 4567.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -273,24 +302,28 @@ if analyze:
     else:
         pred = predict_message(user_input)
         risk_score = round(float(pred) * 100, 2)
+        lower_text = user_input.lower()
 
         suspicious_words = [
             "click", "urgent", "reward", "otp", "bank", "win", "claim",
-            "prize", "offer", "free", "link", "account", "verify", "limited"
+            "prize", "offer", "free", "link", "account", "verify", "limited",
+            "blocked", "suspended", "login"
         ]
-        found_words = [word for word in suspicious_words if word in user_input.lower()]
+        found_words = [word for word in suspicious_words if word in lower_text]
 
         explanation_points = []
-        if any(word in user_input.lower() for word in ["urgent", "immediately", "now", "limited"]):
+        if any(word in lower_text for word in ["urgent", "immediately", "now", "limited"]):
             explanation_points.append("Urgency-based language detected")
-        if any(word in user_input.lower() for word in ["win", "reward", "prize", "offer", "free"]):
+        if any(word in lower_text for word in ["win", "reward", "prize", "offer", "free"]):
             explanation_points.append("Reward or bait-style wording detected")
-        if any(word in user_input.lower() for word in ["click", "link", "verify", "claim"]):
+        if any(word in lower_text for word in ["click", "link", "verify", "claim", "login"]):
             explanation_points.append("Action-trigger phrases detected")
-        if any(word in user_input.lower() for word in ["bank", "account", "otp"]):
+        if any(word in lower_text for word in ["bank", "account", "otp"]):
             explanation_points.append("Sensitive or account-related terms detected")
+        if any(word in lower_text for word in ["debited", "credited", "account ending", "do not share"]):
+            explanation_points.append("Official transaction-style wording detected")
         if not explanation_points:
-            explanation_points.append("No strong manual red-flag keywords detected; classification is based mainly on learned text patterns")
+            explanation_points.append("Classification is based mainly on learned text patterns from the deep learning model")
 
         if pred > 0.5:
             st.markdown(f"""
@@ -303,6 +336,7 @@ if analyze:
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            display_score = risk_score
         else:
             safe_score = round((1 - float(pred)) * 100, 2)
             st.markdown(f"""
@@ -311,20 +345,21 @@ if analyze:
                 <div class="result-text">
                     <b>Safety Confidence:</b> {safe_score}%<br><br>
                     The system did not detect strong phishing indicators in this message. Based on the
-                    learned sequence patterns, it appears to be non-malicious.
+                    learned sequence patterns and smart rule validation, it appears to be non-malicious.
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            display_score = risk_score
 
         st.markdown("### Threat Meter")
-        if risk_score < 30:
-            st.success(f"🟢 Low Risk • {risk_score}%")
-        elif risk_score < 70:
-            st.warning(f"🟡 Medium Risk • {risk_score}%")
+        if display_score < 30:
+            st.success(f"🟢 Low Risk • {display_score}%")
+        elif display_score < 70:
+            st.warning(f"🟡 Medium Risk • {display_score}%")
         else:
-            st.error(f"🔴 High Risk • {risk_score}%")
+            st.error(f"🔴 High Risk • {display_score}%")
 
-        st.progress(min(int(risk_score), 100))
+        st.progress(min(int(display_score), 100))
 
         st.markdown("### Suspicious Keywords Found")
         if found_words:
@@ -349,8 +384,8 @@ with c1:
         <div class="card-title">How the System Works</div>
         <div class="card-text">
             The message is cleaned and tokenized, converted into padded sequences, and processed by a
-            trained LSTM network. The model learns sequential text behavior and predicts whether the
-            content is safe or phishing-related.
+            trained LSTM network. A smart rule-based validation layer is also added to improve reliability
+            for official transaction alerts and reduce false positives.
         </div>
     </div>
     """, unsafe_allow_html=True)
