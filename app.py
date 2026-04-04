@@ -39,15 +39,12 @@ def predict_message(text):
     official_bank_signals = sum(1 for word in official_bank_keywords if word in text_lower)
     phishing_signals = sum(1 for word in phishing_keywords if word in text_lower)
 
-    # Safe official bank alert
     if official_bank_signals >= 2 and phishing_signals == 0:
         return 0.10
 
-    # Strong phishing-style message
     if phishing_signals >= 2:
         return 0.90
 
-    # Otherwise use ML model
     seq = tokenizer.texts_to_sequences([text])
     pad = pad_sequences(seq, maxlen=100)
     pred = model.predict(pad, verbose=0)[0][0]
@@ -64,15 +61,14 @@ html, body, [class*="css"] {
 
 .stApp {
     background:
-        radial-gradient(circle at 10% 20%, rgba(0, 198, 255, 0.12), transparent 20%),
-        radial-gradient(circle at 90% 10%, rgba(0, 114, 255, 0.14), transparent 22%),
-        radial-gradient(circle at 50% 100%, rgba(0, 255, 170, 0.08), transparent 25%),
-        linear-gradient(135deg, #030711 0%, #081120 45%, #02050d 100%);
-    color: #ffffff;
+        radial-gradient(circle at top left, rgba(147, 51, 234, 0.10), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.12), transparent 25%),
+        linear-gradient(135deg, #faf7ff 0%, #f5f0ff 50%, #ffffff 100%);
+    color: #1e1b4b;
 }
 
 [data-testid="stHeader"] {
-    background: rgba(0,0,0,0);
+    background: rgba(255,255,255,0);
 }
 
 .block-container {
@@ -81,61 +77,49 @@ html, body, [class*="css"] {
     max-width: 1250px;
 }
 
-.hero-box {
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-    border: 1px solid rgba(0, 198, 255, 0.22);
+.hero-box, .section-card {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(147, 51, 234, 0.15);
     border-radius: 28px;
-    padding: 34px 34px 26px 34px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-    backdrop-filter: blur(12px);
-    margin-bottom: 22px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.08);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
 }
 
 .hero-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 3.5rem;
+    font-size: 3.4rem;
     font-weight: 800;
-    line-height: 1.05;
+    color: #6d28d9;
     margin-bottom: 10px;
-    color: #f3fbff;
-    text-shadow: 0 0 10px rgba(0,198,255,0.25), 0 0 24px rgba(0,114,255,0.18);
 }
 
 .hero-sub {
-    font-size: 1.1rem;
-    color: #bfd0f2;
+    font-size: 1.08rem;
+    color: #4338ca;
     line-height: 1.7;
     max-width: 900px;
-}
-
-.section-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.28);
-    backdrop-filter: blur(10px);
-    margin-bottom: 20px;
 }
 
 .card-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #f2f7ff;
+    color: #4c1d95;
     margin-bottom: 10px;
 }
 
 .card-text {
-    color: #b8c7e4;
+    color: #4338ca;
     line-height: 1.7;
     font-size: 0.98rem;
 }
 
 .metric-pill {
     display: inline-block;
-    background: rgba(0,198,255,0.10);
-    border: 1px solid rgba(0,198,255,0.20);
-    color: #dff8ff;
+    background: rgba(147, 51, 234, 0.08);
+    border: 1px solid rgba(147, 51, 234, 0.15);
+    color: #6d28d9;
     padding: 10px 16px;
     border-radius: 999px;
     margin-right: 10px;
@@ -145,53 +129,62 @@ html, body, [class*="css"] {
 }
 
 .stTextArea label {
-    color: #e9f2ff !important;
+    color: #4c1d95 !important;
     font-weight: 600 !important;
-    font-size: 1rem !important;
 }
 
 .stTextArea textarea {
-    background: rgba(6, 14, 28, 0.95) !important;
-    color: #ffffff !important;
+    background: rgba(255,255,255,0.95) !important;
+    color: #1e1b4b !important;
     border-radius: 18px !important;
-    border: 1px solid rgba(0,198,255,0.25) !important;
+    border: 1px solid rgba(147, 51, 234, 0.20) !important;
     font-size: 17px !important;
     min-height: 220px !important;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
 }
 
 .stButton > button {
     width: 100%;
     border-radius: 16px;
     border: none;
-    background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+    background: linear-gradient(90deg, #9333ea 0%, #7c3aed 100%);
     color: white;
     font-weight: 700;
     font-size: 1.05rem;
     padding: 0.9rem 1rem;
-    box-shadow: 0 8px 25px rgba(0,198,255,0.28);
+    box-shadow: 0 8px 25px rgba(147, 51, 234, 0.18);
 }
 
-.stButton > button:hover {
-    filter: brightness(1.08);
-    transform: translateY(-1px);
+.small-stat {
+    background: rgba(147, 51, 234, 0.06);
+    border: 1px solid rgba(147, 51, 234, 0.15);
+    border-radius: 18px;
+    padding: 16px;
+    margin-top: 12px;
+    color: #5b21b6;
+}
+
+.sample-box {
+    background: rgba(255,255,255,0.75);
+    border: 1px dashed rgba(147, 51, 234, 0.20);
+    border-radius: 18px;
+    padding: 16px;
+    margin-top: 12px;
+    color: #4338ca;
 }
 
 .result-safe {
-    background: linear-gradient(135deg, rgba(0,255,140,0.12), rgba(0,255,140,0.05));
-    border: 1px solid rgba(0,255,140,0.30);
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.18);
     border-radius: 22px;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(0,255,140,0.08);
     margin-top: 10px;
 }
 
 .result-phish {
-    background: linear-gradient(135deg, rgba(255,70,70,0.14), rgba(255,70,70,0.05));
-    border: 1px solid rgba(255,70,70,0.32);
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.18);
     border-radius: 22px;
     padding: 24px;
-    box-shadow: 0 10px 30px rgba(255,70,70,0.10);
     margin-top: 10px;
 }
 
@@ -203,35 +196,15 @@ html, body, [class*="css"] {
 
 .result-text {
     font-size: 1rem;
-    color: #e9efff;
+    color: #312e81;
     line-height: 1.7;
-}
-
-.sample-box {
-    background: rgba(255,255,255,0.04);
-    border: 1px dashed rgba(255,255,255,0.16);
-    border-radius: 18px;
-    padding: 16px;
-    margin-top: 12px;
-    color: #dbe7ff;
-    font-size: 0.96rem;
-    line-height: 1.6;
-}
-
-.small-stat {
-    background: rgba(0,198,255,0.08);
-    border: 1px solid rgba(0,198,255,0.18);
-    border-radius: 18px;
-    padding: 16px;
-    margin-top: 12px;
-    color: #eaf7ff;
 }
 
 .footer {
     text-align: center;
     margin-top: 28px;
     padding: 20px;
-    color: #8fa5d1;
+    color: #6d28d9;
     font-size: 0.95rem;
 }
 </style>
@@ -243,8 +216,7 @@ st.markdown("""
     <div class="hero-title">🛡️ CyberShield AI</div>
     <div class="hero-sub">
         AI-Powered Phishing Threat Intelligence Platform for analyzing SMS and email content using
-        Natural Language Processing and Deep Learning. The system identifies suspicious wording,
-        deceptive urgency, reward bait, and fraud-like message behavior in real time.
+        Natural Language Processing and Deep Learning.
     </div>
     <div>
         <span class="metric-pill">NLP Preprocessing</span>
@@ -260,14 +232,11 @@ left, right = st.columns([1.45, 1])
 with left:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">Threat Analysis Console</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="card-text">Paste any SMS or email content below and let CyberShield AI evaluate whether the message appears safe or potentially phishing-related.</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="card-text">Paste any SMS or email content below and let CyberShield AI analyze it.</div>', unsafe_allow_html=True)
 
     user_input = st.text_area(
         "Enter SMS or Email Message",
-        placeholder="Example: Congratulations! You have won 50000 rupees. Click the link now to claim your reward."
+        placeholder="Example: Congratulations! You have won 50000 rupees. Click now to claim your reward."
     )
 
     analyze = st.button("Analyze Message Threat")
@@ -277,21 +246,18 @@ with right:
     st.markdown("""
     <div class="section-card">
         <div class="card-title">Threat Intelligence Panel</div>
-        <div class="card-text">
-            The system checks for suspicious features such as urgency, fake rewards, risky action phrases,
-            fraud-oriented communication style, and official transaction-message patterns.
-        </div>
         <div class="small-stat"><b>Model Accuracy:</b> 98%+</div>
         <div class="small-stat"><b>Architecture:</b> Embedding + LSTM</div>
         <div class="small-stat"><b>Dataset Size:</b> 5572 messages</div>
-       <div class="sample-box">
-    <b>Phishing example:</b><br>
-    Congratulations! You have won 50000 rupees. Click now to claim your reward.
-</div>
 
-<div class="sample-box">
-    <b>Safe example:</b><br>
-    Hi bro, meeting is at 5 pm tomorrow. Please be on time.
+        <div class="sample-box">
+            <b>Phishing example:</b><br>
+            Congratulations! You have won 50000 rupees. Click now to claim your reward.
+        </div>
+
+        <div class="sample-box">
+            <b>Safe example:</b><br>
+            Hi bro, meeting is at 5 pm tomorrow. Please be on time.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -303,80 +269,42 @@ if analyze:
     else:
         pred = predict_message(user_input)
         risk_score = round(float(pred) * 100, 2)
-        lower_text = user_input.lower()
-
-        suspicious_words = [
-            "click", "urgent", "reward", "otp", "bank", "win", "claim",
-            "prize", "offer", "free", "link", "account", "verify", "limited",
-            "blocked", "suspended", "login"
-        ]
-        found_words = [word for word in suspicious_words if word in lower_text]
-
-        explanation_points = []
-        if any(word in lower_text for word in ["urgent", "immediately", "now", "limited"]):
-            explanation_points.append("Urgency-based language detected")
-        if any(word in lower_text for word in ["win", "reward", "prize", "offer", "free"]):
-            explanation_points.append("Reward or bait-style wording detected")
-        if any(word in lower_text for word in ["click", "link", "verify", "claim", "login"]):
-            explanation_points.append("Action-trigger phrases detected")
-        if any(word in lower_text for word in ["bank", "account", "otp"]):
-            explanation_points.append("Sensitive or account-related terms detected")
-        if any(word in lower_text for word in ["debited", "credited", "account ending", "do not share"]):
-            explanation_points.append("Official transaction-style wording detected")
-        if not explanation_points:
-            explanation_points.append("Classification is based mainly on learned text patterns from the deep learning model")
 
         if pred > 0.5:
             st.markdown(f"""
             <div class="result-phish">
                 <div class="result-title">⚠️ Phishing Threat Detected</div>
                 <div class="result-text">
-                    <b>Threat Confidence:</b> {risk_score}%<br><br>
-                    This message appears suspicious and contains patterns commonly associated with
-                    phishing, deceptive intent, or fraudulent communication.
+                    <b>Threat Confidence:</b> {risk_score}%
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            display_score = risk_score
         else:
             safe_score = round((1 - float(pred)) * 100, 2)
             st.markdown(f"""
             <div class="result-safe">
                 <div class="result-title">✅ Message Appears Safe</div>
                 <div class="result-text">
-                    <b>Safety Confidence:</b> {safe_score}%<br><br>
-                    The system did not detect strong phishing indicators in this message. Based on the
-                    learned sequence patterns and smart rule validation, it appears to be non-malicious.
+                    <b>Safety Confidence:</b> {safe_score}%
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            display_score = risk_score
 
         st.markdown("### Threat Meter")
-        if display_score < 30:
-            st.success(f"🟢 Low Risk • {display_score}%")
-        elif display_score < 70:
-            st.warning(f"🟡 Medium Risk • {display_score}%")
+        if risk_score < 30:
+            st.success(f"🟢 Low Risk • {risk_score}%")
+        elif risk_score < 70:
+            st.warning(f"🟡 Medium Risk • {risk_score}%")
         else:
-            st.error(f"🔴 High Risk • {display_score}%")
+            st.error(f"🔴 High Risk • {risk_score}%")
 
-        st.progress(min(int(display_score), 100))
-
-        st.markdown("### Suspicious Keywords Found")
-        if found_words:
-            st.write(", ".join(found_words))
-        else:
-            st.write("No obvious suspicious keywords found.")
-
-        st.markdown("### Why this result?")
-        for point in explanation_points:
-            st.write(f"- {point}")
+        st.progress(min(int(risk_score), 100))
 
         label = "Phishing" if pred > 0.5 else "Safe"
         st.session_state.scan_history.insert(0, f"{label} • {user_input[:60]}...")
         st.session_state.scan_history = st.session_state.scan_history[:5]
 
-# ---------------- BOTTOM SECTION ----------------
+# ---------------- BOTTOM ----------------
 c1, c2 = st.columns(2)
 
 with c1:
@@ -384,9 +312,8 @@ with c1:
     <div class="section-card">
         <div class="card-title">How the System Works</div>
         <div class="card-text">
-            The message is cleaned and tokenized, converted into padded sequences, and processed by a
-            trained LSTM network. A smart rule-based validation layer is also added to improve reliability
-            for official transaction alerts and reduce false positives.
+            Uses NLP preprocessing, tokenization, sequence padding, LSTM prediction,
+            and smart rule-based validation.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -394,11 +321,13 @@ with c1:
 with c2:
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="card-title">Recent Scan History</div>', unsafe_allow_html=True)
+
     if st.session_state.scan_history:
         for item in st.session_state.scan_history:
             st.write(f"- {item}")
     else:
         st.write("No scans yet.")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div class="footer">Developed by Nikhil • CyberShield AI</div>', unsafe_allow_html=True)
