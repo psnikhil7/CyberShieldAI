@@ -284,13 +284,14 @@ with right:
         <div class="small-stat"><b>Model Accuracy:</b> 98%+</div>
         <div class="small-stat"><b>Architecture:</b> Embedding + LSTM</div>
         <div class="small-stat"><b>Dataset Size:</b> 5572 messages</div>
-        <div class="sample-box">
-            <b>Phishing example:</b><br>
-            Congratulations! You have won 50000 rupees. Click now to claim your reward.
-        </div>
-        <div class="sample-box">
-            <b>Official bank example:</b><br>
-            Dear Customer, INR 2,500 has been debited from your SBI account ending 4567.
+       <div class="sample-box">
+    <b>Phishing example:</b><br>
+    Congratulations! You have won 50000 rupees. Click now to claim your reward.
+</div>
+
+<div class="sample-box">
+    <b>Safe example:</b><br>
+    Hi bro, meeting is at 5 pm tomorrow. Please be on time.
         </div>
     </div>
     """, unsafe_allow_html=True)
