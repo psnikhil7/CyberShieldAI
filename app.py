@@ -247,7 +247,7 @@ st.markdown("""
 <div class="hero-card">
     <div class="hero-title">🛡️ CyberShield AI</div>
     <div class="hero-subtitle">
-        A premium AI-powered phishing threat intelligence platform for analyzing SMS and email content
+        An AI-powered phishing threat intelligence platform for analyzing SMS and email content
         using Natural Language Processing and Deep Learning. The system evaluates risky message patterns,
         suspicious wording, urgency, and fraud-like communication behavior in real time.
     </div>
